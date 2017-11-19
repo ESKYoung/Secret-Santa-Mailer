@@ -155,9 +155,6 @@ def get_giphy():
         Filename of the downloaded GIF that is stored in the working directory,
         and its GIPHY URL.
     """
-    giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
-                                       "[Enter GIPHY API token]: "))
-
     giphy_url = ("http://api.giphy.com/v1/gifs/random?api_key=" +
                  giphy_api_token + "&tag=Merry+Christmas&rating=PG")
 
@@ -197,40 +194,38 @@ def call_postman(santas_mailbox, giver, giver_mailbox, receiver, plain_body,
         A sent email message for each Secret Santa, notifying them of their
         randomly assigned gift receiver.
     """
-    giphy_filename, giphy_link = get_giphy()
+    giphy_filename, giphy_link = get_giphy() 
 
-    santas_key = getpass.getpass("Santa's secret key [Enter password]: ")
-
-    santas_letter = MIMEMultipart('related')
-    santas_letter['Subject'] = "Secret Santa"
-    santas_letter['From'] = santas_mailbox
-    santas_letter['To'] = giver_mailbox
+    santas_letter = MIMEMultipart("related")
+    santas_letter["Subject"] = "Secret Santa"
+    santas_letter["From"] = santas_mailbox
+    santas_letter["To"] = giver_mailbox
     santas_letter.preamble = "This is a multi-part message in MIME format."
-    
-    santas_letter_alt = MIMEMultipart('alternative')
+
+    santas_letter_alt = MIMEMultipart("alternative")
     santas_letter.attach(santas_letter_alt)
-    
+
     santas_letter.attach(MIMEText(plain_body.format(giver=giver,
                                                     receiver=receiver,
-                                                    link=giphy_link), 'plain'))
+                                                    link=giphy_link), "plain"))
     santas_letter_alt.attach(MIMEText(html_body.format(giver=giver,
                                                        receiver=receiver,
                                                        link=giphy_link),
-                                      'html'))
-    
+                                      "html"))
+
     with open(giphy_filename, "rb") as gif:
         santas_picture = MIMEImage(gif.read())
 
-    santas_picture.add_header('Content-ID', '<image1>')
+    santas_picture.add_header("Content-ID", "<image1>")
     santas_letter.attach(santas_picture)
 
     print("Sending letter to a Secret Santa...")
 
-    santas_server = smtplib.SMTP('smtp.gmail.com', 587)
+    santas_server = smtplib.SMTP("smtp.gmail.com", 587)
     santas_server.ehlo()
     santas_server.starttls()
     santas_server.login(santas_mailbox, santas_key)
-    santas_server.sendmail(santas_mailbox, giver_mailbox, 
+    santas_server.sendmail(santas_mailbox, giver_mailbox,
                            santas_letter.as_string())
     santas_server.quit()
 
@@ -292,7 +287,7 @@ with open("Secret_Santa_Email_Body.txt", "r") as f:
     santa_letter_plain = f.read()
 
 # Import the HTML email message template
-with open("Secret_Santa_Email_Body.html", "r") as f:
+with open("Secret_Santa_Email_Body.html", "r", encoding="utf8") as f:
     santa_letter_html = f.read()
 
 # Gmail account for the Secret Santa mailbox, with validator
@@ -306,6 +301,16 @@ secret_santa_sleighs = pd.read_csv(sys.argv[2],
                                    names=["santas", "reindeers"], header=0)
 secret_santas = secret_santa_sleighs.santas.tolist()
 secret_reindeers = secret_santa_sleighs.reindeers.tolist()
+
+""" Set Santa's key(Gmail account password), and the GIPHY API token as global 
+variables"""
+global santas_key
+global giphy_api_token
+
+# Get Santa's key, and the GIPHY API token
+santas_key = getpass.getpass("Santa's secret key [Enter email password]: ")
+giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
+                                   "[Enter GIPHY API token]: "))
 
 # Execute function
 secret_santa_mailer(secret_santas
