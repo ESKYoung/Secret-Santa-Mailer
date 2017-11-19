@@ -105,3 +105,6 @@ venv.bak/
 
 # CSV files containing Secret Santa data
 *.csv 
+
+# Temporary GIF files from GIPHY
+*.gif
