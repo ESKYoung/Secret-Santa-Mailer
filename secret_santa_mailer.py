@@ -194,7 +194,7 @@ def call_postman(santas_mailbox, giver, giver_mailbox, receiver, plain_body,
         A sent email message for each Secret Santa, notifying them of their
         randomly assigned gift receiver.
     """
-    giphy_filename, giphy_link = get_giphy() 
+    giphy_filename, giphy_link = get_giphy()
 
     santas_letter = MIMEMultipart("related")
     santas_letter["Subject"] = "Secret Santa"
@@ -260,24 +260,32 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox, plain_body,
     givers = []
     receivers = []
 
+    # Boolean flag to check for an odd number of Secret Santas
+    odd_santa_flag = len(sleighs.keys()) % 2 != 0
+
     while len(givers) < len(sleighs.keys()):
 
         giver = secrets.choice([santa for santa in sleighs.keys()
                                 if santa not in givers])
-        receiver = secrets.choice([santa for santa in sleighs.keys()
-                                   if santa not in receivers])
+        givers.append(giver)
 
-        """ If the chosen receiver is also the giver, iterate through until
-        someone different is randomly chosen."""
-        while giver == receiver:
+        """ Check if there are an odd number of Secret Santas, and the while
+        loop is on the penultimate iteration. If this is the case, only pick a
+        receiver who was not a giver in previous iterations. Prevents A>B, B>A,
+        and C on their own."""
+        if odd_santa_flag and len(givers) == len(sleighs.keys()) - 1 \
+                and giver in receivers:
+            receiver = [santa for santa in sleighs.keys()
+                        if santa not in receivers +
+                        [giver, givers[receivers.index(giver)]]][0]
+        else:
             receiver = secrets.choice([santa for santa in sleighs.keys()
-                                       if santa not in receivers])
-
+                                       if santa not in receivers + [giver]])
+        
+        receivers.append(receiver)
+        
         call_postman(santas_mailbox, giver, sleighs[giver], receiver,
                      plain_body, html_body)
-
-        givers.append(giver)
-        receivers.append(receiver)
 
     print("All letters sent - Merry Christmas!")
 
@@ -302,7 +310,7 @@ secret_santa_sleighs = pd.read_csv(sys.argv[2],
 secret_santas = secret_santa_sleighs.santas.tolist()
 secret_reindeers = secret_santa_sleighs.reindeers.tolist()
 
-""" Set Santa's key(Gmail account password), and the GIPHY API token as global 
+""" Set Santa's key(Gmail account password), and the GIPHY API token as global
 variables"""
 global santas_key
 global giphy_api_token
