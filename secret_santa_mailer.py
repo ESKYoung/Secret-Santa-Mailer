@@ -50,18 +50,23 @@ def find_santas(reindeers, sleighs):
             items. If everything is correct, items should match "reindeers".
 
     Yields:
-        If there are fewer names than email addresses, exit the system, and
-        throw an error message. Otherwise, print a statement that everything is
-        okay.
+        Give a message if there are duplicate email addresses. If there are
+        fewer names than email addresses, exit the system, and throw an error
+        message. If there are less than two Secret Santas, throw an error
+        message. Otherwise, print a statement that everything is okay.
     """
+    if len(reindeers) != len(set(reindeers)):
+        print("Some reindeers are twins! [Duplicate email addresses]")
+
     resting_santas = len(sleighs.keys()) - len(reindeers)
+
     if resting_santas < 0:
         sys.exit("Mrs Claus says some Secret Santas is resting by the " +
                  "fireplace... [Missing " + str(abs(resting_santas)) +
                  " santa(s)]")
     elif len(sleighs.keys()) < 2:
         sys.exit("Not enough Secret Santas for the delivery! [Minimum of two " +
-                "Secret Santas required]")
+                 "Secret Santas required]")
     else:
         print("All Secret Santas present!")
 
@@ -78,10 +83,14 @@ def find_reindeers(santas, sleighs):
             items. If everything is correct, keys should match "santas".
 
     Yields:
-        If there are fewer email addresses than names, each name missing an
-        email address is printed, before exiting the system, and throwing an
-        error message. Otherwise, print a statement that everything is okay.
+        If there are duplicate Secret Santas, throw an error message. If there
+        are fewer email addresses than names, each name missing an email address
+        is printed, before exiting the system, and throwing an error message.
+        Otherwise, print a statement that everything is okay.
     """
+    if len(santas) != len(set(santas)):
+        sys.exit("There's an imposter! [All Secret Santas must be unique]")
+
     resting_reindeers = []
 
     for santa in santas:
@@ -284,9 +293,9 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox, plain_body,
         else:
             receiver = secrets.choice([santa for santa in sleighs.keys()
                                        if santa not in receivers + [giver]])
-        
+
         receivers.append(receiver)
-        
+
         call_postman(santas_mailbox, giver, sleighs[giver], receiver,
                      plain_body, html_body)
 
