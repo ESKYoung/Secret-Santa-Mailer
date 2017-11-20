@@ -156,7 +156,7 @@ def get_giphy():
         and its GIPHY URL.
     """
     giphy_url = ("http://api.giphy.com/v1/gifs/random?api_key=" +
-                 giphy_api_token + "&tag=Merry+Christmas&rating=PG")
+                 giphy_api_token + "&tag=Christmas&rating=PG")
 
     with urllib.request.urlopen(giphy_url) as giphy_request:
         giphy_data = json.loads(giphy_request.read())
