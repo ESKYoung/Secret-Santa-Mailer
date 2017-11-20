@@ -60,7 +60,7 @@ def find_santas(reindeers, sleighs):
                  "fireplace... [Missing " + str(abs(resting_santas)) +
                  " santa(s)]")
     elif len(sleighs.keys()) < 2:
-        sys.ext("Not enough Secret Santas for the delivery! [Minimum of two " +
+        sys.exit("Not enough Secret Santas for the delivery! [Minimum of two " +
                 "Secret Santas required]")
     else:
         print("All Secret Santas present!")
