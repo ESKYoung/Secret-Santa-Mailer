@@ -32,13 +32,14 @@ import re
 import smtplib
 import urllib.request
 import json
+import os
 import getpass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
 
-def continue_checker (message, exit_message):
+def continue_checker(message, exit_message):
     """Check that the code should continue to the next step
 
     Check that the code should continue to the next step, whilst displaying
@@ -84,9 +85,9 @@ def find_santas(reindeers, sleighs):
     """
     # Check for duplicate messages, and ask the user if they want to continue
     if len(reindeers) != len(set(reindeers)):
-        continue_checker(("Some reindeers are twins! [Duplicate email " +
-                          "addresses]"), ("Unexpectedly found twin " +
-                          "reindeers! [Duplicate email addresses found]"))
+        continue_checker("Some reindeers are twins! [Duplicate email " +
+                         "addresses]", "Unexpectedly found twin reindeers! " +
+                         "[Duplicate email addresses found]")
 
     # Difference calculation to see if there are missing names
     resting_santas = len(sleighs.keys()) - len(reindeers)
@@ -120,7 +121,7 @@ def find_reindeers(santas, sleighs):
         is printed, before exiting the system, and throwing an error message.
         Otherwise, print a statement that everything is okay.
     """
-    # Check for duplicate names, and thow an error if there any duplicates
+    # Check for duplicate names, and throw an error if there any duplicates
     if len(santas) != len(set(santas)):
         sys.exit("There's an imposter! [All Secret Santas must be unique]")
 
@@ -175,7 +176,7 @@ def check_reindeers(sleighs):
     for santa, reindeer in sleighs.items():
         if re.search(vet_check, reindeer) is None:
 
-            #Add names with invalid email addresses to the storage list
+            # Add names with invalid email addresses to the storage list
             poorly_reindeers.append(santa)
 
             # Print a message for any names with invalid email addresses
@@ -194,11 +195,13 @@ def check_reindeers(sleighs):
         print("All sleighs are ready to go!")
 
 
-def get_giphy():
-    """Get a random festive GIF from GIPHY
+def mime_giphy():
+    """Generate a MIME image from a random festive GIF from GIPHY
 
-    Randomly download a festive GIF from GIPHY. Rated PG or below only, and
-    requires a GIPHY API token.
+    Randomly download a festive GIF from GIPHY, create a corresponding MIME
+    image with a unique content ID, and then delete the downloaded GIF.
+
+    GIF is rated PG or below only, and GIPHY API use requires a token.
 
     Yields:
         Filename of the downloaded GIF that is stored in the working directory,
@@ -206,7 +209,7 @@ def get_giphy():
     """
     # Invoke the GIPHY API to get JSON for a random festive GIF
     giphy_url = ("http://api.giphy.com/v1/gifs/random?api_key=" +
-                 giphy_api_token + "&tag=Christmas&rating=R")
+                 giphy_api_token + "&tag=Christmas&rating=PG")
 
     # Open the URL, and decode the JSON return
     with urllib.request.urlopen(giphy_url) as giphy_request:
@@ -222,53 +225,6 @@ def get_giphy():
     giphy_filename, _ = urllib.request.urlretrieve(giphy_link, giphy_id +
                                                    ".gif")
 
-    # Return both the downladed filename, and the GIPHY URL
-    return giphy_filename, giphy_link, giphy_id
-
-
-def call_postman(santas_mailbox, giver, giver_mailbox, receiver, plain_body,
-                 html_body):
-    """Call the postman, and post Santa's instructions to all Secret Santas
-
-    Generate an email message based on the plain text, and HTML templates.
-    Populate this message with the randomly-assigned receiver's name, the
-    random, festive GIF and its link.
-
-    Then email this to the randomly selected Secret Santa using a Gmail account.
-    Requires Gmail account, and password. Account must be set to allow less
-    secure apps, or, if using two-step verification, an app password must be
-    used instead.
-
-    Args:
-        santas_mailbox (str): A valid email address corresponding to the Gmail
-            account.
-        giver (str): Randomly selected Secret Santa.
-        giver_mailbox (str): A valid email address for "giver".
-        receiver (str): Randomly assigned gift receiver from the "giver".
-        plain_body (str): Plain text email message template.
-        html_body (str): HTML email message template.
-
-    Yields:
-        A sent email message for each Secret Santa, notifying them of their
-        randomly assigned gift receiver.
-    """
-    # Intialise all aspects of the MIME multipart messages
-    santas_letter = MIMEMultipart("mixed")
-    santas_letter_alt = MIMEMultipart("alternative")
-    santas_letter_rel = MIMEMultipart("related")
-
-    # Establish the MIME multipart hierarchy. Mixed > Alternative > Relative
-    santas_letter.attach(santas_letter_alt)
-    santas_letter_alt.attach(santas_letter_rel)
-
-    # Attach required parts to the mixed part
-    santas_letter["From"] = santas_mailbox
-    santas_letter["To"] = giver_mailbox
-    santas_letter["Subject"] = "Secret Santa"
-
-    # Get a random festive GIF using the GIPHY API
-    giphy_filename, giphy_link, giphy_id = get_giphy()
-
     # Open the GIF, and create a MIME image
     with open(giphy_filename, "rb") as gif:
         santas_picture = MIMEImage(gif.read())
@@ -276,34 +232,14 @@ def call_postman(santas_mailbox, giver, giver_mailbox, receiver, plain_body,
     # Add a Content ID to santas_picture
     santas_picture.add_header("Content-ID", ("<" + giphy_id + ">"))
 
-    # Attach plain text body to the alternative part
-    santas_letter_alt.attach(MIMEText(plain_body.format(giver=giver,
-                                                        receiver=receiver,
-                                                        link=giphy_link),
-                                                        "plain"))
+    # Delete the downloaded GIF - prevent storage of lots of GIFs at the end
+    os.remove(giphy_filename)
 
-    # Attach the HTML body, and santas_picture to the relative part
-    santas_letter_rel.attach(MIMEText(html_body.format(giver=giver,
-                                                       receiver=receiver,
-                                                       link=giphy_link,
-                                                       id=giphy_id),
-                                                       "html"))
-    santas_letter_rel.attach(santas_picture)
-
-    print("Sending letter to a Secret Santa...")
-
-    # Open a connection to the email server, and send the email
-    santas_server = smtplib.SMTP("smtp.gmail.com", 587)
-    santas_server.ehlo()
-    santas_server.starttls()
-    santas_server.login(santas_mailbox, santas_key)
-    santas_server.sendmail(santas_mailbox, giver_mailbox,
-                           santas_letter.as_string())
-    santas_server.quit()
+    # Return both the downloaded filename, and the GIPHY URL
+    return santas_picture, giphy_link, giphy_id
 
 
-def secret_santa_mailer(santas, reindeers, santas_mailbox, plain_body,
-                        html_body):
+def secret_santa_randomiser(sleighs):
     """Check everyone's ready, randomly assign givers and receivers, and send
     out letters
 
@@ -312,25 +248,12 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox, plain_body,
     nested function to email and notify the Secret Santa.
 
     Args:
-        santas (list): List of Secret Santa names.
-        reindeers (list): List of email addresses.
-        santas_mailbox (str): A valid email address corresponding to the Gmail
-            account.
-        plain_body (str): Plain text email message template.
-        html_body (str): HTML email message template.
-
+        sleighs (dict): Dictionary with names as keys, and email addresses as
+            items.
     Yields:
-        A sent email message for each Secret Santa, notifying them of their
-        randomly assigned gift receiver.
+        santa_pairings (dict): Dictionary with giver names as keys, and email
+            addresses as items.
     """
-    # Create a dictionary of names and associated email addresses
-    sleighs = dict(zip(secret_santas, secret_reindeers))
-
-    # Run checks on the names and email addresses
-    find_santas(reindeers, sleighs)
-    find_reindeers(santas, sleighs)
-    check_reindeers(sleighs)
-
     # Initialise storage lists for the givers and receivers
     givers = []
     receivers = []
@@ -363,20 +286,153 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox, plain_body,
         # Add the selected receiver to the storage list
         receivers.append(receiver)
 
-        # Send emails out to the giver notifying them of their receiver
-        call_postman(santas_mailbox, giver, sleighs[giver], receiver,
-                     plain_body, html_body)
+    # Generate a dictionary of givers as keys, and receivers as items
+    santa_pairings = dict(zip(givers, receivers))
+    print(givers, receivers)
+    print(santa_pairings)
+    # Return a dictionary of givers as keys, and receivers as items
+    return santa_pairings
+
+
+def call_postman(santas_mailbox, sleighs, santa_pairings):
+    """Call the postman, and post Santa's instructions to all Secret Santas
+
+    Generate an email message based on the plain text, and HTML templates.
+    Populate this message with the randomly-assigned receiver's name, the
+    random, festive GIF and its link.
+
+    Then email this to the randomly selected Secret Santa using a Gmail account.
+    Requires Gmail account, and password. Account must be set to allow less
+    secure apps, or, if using two-step verification, an app password must be
+    used instead.
+
+    Args:
+        santas_mailbox (str): A valid email address corresponding to the Gmail
+            account.
+        sleighs (dict): Dictionary with names as keys, and email addresses as
+            items.
+        santa_pairings (dict): Dictionary with giver names as keys, and email
+            addresses as items.
+
+    Yields:
+        A sent email message for each Secret Santa, notifying them of their
+        randomly assigned gift receiver.
+    """
+    # Import the plain text email message template
+    with open("Secret_Santa_Email_Body.txt", "r") as f:
+        plain_body = f.read()
+
+    # Import the HTML email message template
+    with open("Secret_Santa_Email_Body.html", "r", encoding="utf8") as f:
+        html_body = f.read()
+
+    # Open a connection to the email server, and send the email
+    santas_server = smtplib.SMTP("smtp.gmail.com", 587)
+    santas_server.ehlo()
+    santas_server.starttls()
+    santas_server.login(santas_mailbox, santas_key)
+
+    """Iterate through each Secret Santa giver, and send them an email with
+    their selected receiver"""
+    for giver in santa_pairings:
+        # Extract the giver's email address, and their receiver
+        giver_mailbox = sleighs[giver]
+        receiver = santa_pairings[giver]
+
+        # Get a random festive GIF using the GIPHY API in a MIME image format
+        santas_picture, giphy_link, giphy_id = mime_giphy()
+        
+        """To ensure the HTML version is preferential, first setup a mixed MIME
+        message to contain the essentials, e.g. "From", "To", "Subject". 
+        
+        Then generate an alternative MIME subpart to hold plain text, and HTML
+        versions of the email. The plain text comes first to ensure HTML is 
+        preferential. 
+        
+        As there is an embedded image in the HTML version, a related MIME 
+        section is added that is a subpart of the alternative MIME subpart.
+        This ensures the HTML version is still preferential, and the embedded 
+        image is displayed."""
+        
+        # Initialise a mixed MIME message
+        santas_letter = MIMEMultipart("mixed")
+        
+        # Attach required parts to the mixed part
+        santas_letter["From"] = santas_mailbox
+        santas_letter["To"] = giver_mailbox
+        santas_letter["Subject"] = "Secret Santa"
+        
+        # Initialise an alternative subpart of the MIME message, and attach it
+        santas_letter_alt = MIMEMultipart("alternative")
+        santas_letter.attach(santas_letter_alt)
+
+        # Attach plain text body to the alternative part
+        santas_letter_alt.attach(MIMEText(plain_body.format(giver=giver,
+                                                            receiver=receiver,
+                                                            link=giphy_link),
+                                          "plain"))
+        
+        """Initialise an related subpart of the alternative subpart of the MIME 
+        message, and attach it"""
+        santas_letter_rel = MIMEMultipart("related")
+        santas_letter_alt.attach(santas_letter_rel)
+        
+        # Attach the HTML body, and santas_picture to the relative part
+        santas_letter_rel.attach(MIMEText(html_body.format(giver=giver,
+                                                           receiver=receiver,
+                                                           link=giphy_link,
+                                                           id=giphy_id),
+                                          "html"))
+        santas_letter_rel.attach(santas_picture)
+
+        print("Sending letter to a Secret Santa...")
+
+        # Send email to sender
+        santas_server.sendmail(santas_mailbox, giver_mailbox,
+                               santas_letter.as_string())
+
+    # Exit server
+    santas_server.quit()
+
+
+def secret_santa_mailer(santas, reindeers, santas_mailbox):
+    """Check everyone's ready, randomly assign givers and receivers, and send
+    out letters
+
+    Check all entries are valid using other nested functions. Then randomly
+    choose a Secret Santa, and randomly assign a gift receiver. Then use another
+    nested function to email and notify the Secret Santa.
+
+    Args:
+        santas (list): List of Secret Santa names.
+        reindeers (list): List of email addresses.
+        santas_mailbox (str): A valid email address corresponding to the Gmail
+            account.
+
+    Yields:
+        A sent email message for each Secret Santa, notifying them of their
+        randomly assigned gift receiver.
+    """
+    # Create a dictionary of names and associated email addresses
+    sleighs = dict(zip(secret_santas, secret_reindeers))
+
+    # Run checks on the names and email addresses
+    find_santas(reindeers, sleighs)
+    find_reindeers(santas, sleighs)
+    check_reindeers(sleighs)
+
+    # Pair Secret Santas with each other randomly
+    secret_santa_pairings = secret_santa_randomiser(sleighs)
+
+    # Check that the user wants to send out the messages
+    continue_checker("Secret Santa randomisation complete!", "OK, maybe next " +
+                     "time then!")
+
+    # Send emails out to the giver notifying them of their receiver
+    call_postman(santas_mailbox, sleighs, secret_santa_pairings)
 
     print("All letters sent - Merry Christmas!")
 
-
-# Import the plain text email message template
-with open("Secret_Santa_Email_Body.txt", "r") as f:
-    santa_letter_plain = f.read()
-
-# Import the HTML email message template
-with open("Secret_Santa_Email_Body.html", "r", encoding="utf8") as f:
-    santa_letter_html = f.read()
 
 # Gmail account for the Secret Santa mailbox, with validator
 if re.search(r"(^[a-zA-Z0-9_.+-]+@gmail.com$)", sys.argv[1]) is None:
@@ -390,12 +446,7 @@ secret_santa_sleighs = pd.read_csv(sys.argv[2],
 secret_santas = secret_santa_sleighs.santas.tolist()
 secret_reindeers = secret_santa_sleighs.reindeers.tolist()
 
-""" Set Santa's key(Gmail account password), and the GIPHY API token as global
-variables"""
-global santas_key
-global giphy_api_token
-
-# Get Santa's key, and the GIPHY API token
+# Obtain the password for the Secret Santa mailbox, and the GIPHY API token
 santas_key = getpass.getpass("Santa's secret key [Enter email password]: ")
 giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
                                    "[Enter GIPHY API token]: "))
@@ -403,6 +454,4 @@ giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
 # Execute function
 secret_santa_mailer(secret_santas
                     , secret_reindeers
-                    , secret_santas_mailbox
-                    , santa_letter_plain
-                    , santa_letter_html)
+                    , secret_santas_mailbox)
