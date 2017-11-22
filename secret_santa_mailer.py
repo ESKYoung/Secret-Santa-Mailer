@@ -288,8 +288,7 @@ def secret_santa_randomiser(sleighs):
 
     # Generate a dictionary of givers as keys, and receivers as items
     santa_pairings = dict(zip(givers, receivers))
-    print(givers, receivers)
-    print(santa_pairings)
+
     # Return a dictionary of givers as keys, and receivers as items
     return santa_pairings
 
