@@ -209,7 +209,7 @@ def mime_giphy():
     """
     # Invoke the GIPHY API to get JSON for a random festive GIF
     giphy_url = ("http://api.giphy.com/v1/gifs/random?api_key=" +
-                 giphy_api_token + "&tag=Christmas&rating=PG")
+                 giphy_api_token + "&tag=Merry+Christmas&rating=PG-13")
 
     # Open the URL, and decode the JSON return
     with urllib.request.urlopen(giphy_url) as giphy_request:
@@ -325,6 +325,11 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
     with open("Secret_Santa_Email_Body.html", "r", encoding="utf8") as f:
         html_body = f.read()
 
+    # Open the GitHub icon, create a MIME image, and add a content ID
+    with open("GitHub-Mark-32px.png", "rb") as png:
+        octocat_icon = MIMEImage(png.read())
+    octocat_icon.add_header("Content-ID", "<Octocat>")
+
     # Open a connection to the email server, and send the email
     santas_server = smtplib.SMTP("smtp.gmail.com", 587)
     santas_server.ehlo()
@@ -340,27 +345,27 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
 
         # Get a random festive GIF using the GIPHY API in a MIME image format
         santas_picture, giphy_link, giphy_id = mime_giphy()
-        
+
         """To ensure the HTML version is preferential, first setup a mixed MIME
-        message to contain the essentials, e.g. "From", "To", "Subject". 
-        
+        message to contain the essentials, e.g. "From", "To", "Subject".
+
         Then generate an alternative MIME subpart to hold plain text, and HTML
-        versions of the email. The plain text comes first to ensure HTML is 
-        preferential. 
-        
-        As there is an embedded image in the HTML version, a related MIME 
+        versions of the email. The plain text comes first to ensure HTML is
+        preferential.
+
+        As there is an embedded image in the HTML version, a related MIME
         section is added that is a subpart of the alternative MIME subpart.
-        This ensures the HTML version is still preferential, and the embedded 
+        This ensures the HTML version is still preferential, and the embedded
         image is displayed."""
-        
+
         # Initialise a mixed MIME message
         santas_letter = MIMEMultipart("mixed")
-        
+
         # Attach required parts to the mixed part
         santas_letter["From"] = santas_mailbox
         santas_letter["To"] = giver_mailbox
         santas_letter["Subject"] = "Secret Santa"
-        
+
         # Initialise an alternative subpart of the MIME message, and attach it
         santas_letter_alt = MIMEMultipart("alternative")
         santas_letter.attach(santas_letter_alt)
@@ -370,12 +375,12 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
                                                             receiver=receiver,
                                                             link=giphy_link),
                                           "plain"))
-        
-        """Initialise an related subpart of the alternative subpart of the MIME 
+
+        """Initialise an related subpart of the alternative subpart of the MIME
         message, and attach it"""
         santas_letter_rel = MIMEMultipart("related")
         santas_letter_alt.attach(santas_letter_rel)
-        
+
         # Attach the HTML body, and santas_picture to the relative part
         santas_letter_rel.attach(MIMEText(html_body.format(giver=giver,
                                                            receiver=receiver,
@@ -383,6 +388,9 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
                                                            id=giphy_id),
                                           "html"))
         santas_letter_rel.attach(santas_picture)
+
+        # Attach the octocat logo to the relative part
+        santas_letter_rel.attach(octocat_icon)
 
         print("Sending letter to a Secret Santa...")
 
