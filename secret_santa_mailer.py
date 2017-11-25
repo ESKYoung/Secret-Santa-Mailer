@@ -125,7 +125,7 @@ def find_reindeers(santas, sleighs):
     """
     # Check for duplicate names, and throw an error if there any duplicates
     if len(santas) != len(set(santas)):
-        sys.exit("There's an imposter! [All Secret Santas must be unique]")
+        sys.exit("There's an impostor! [All Secret Santas must be unique]")
 
     # Initialise a storage list to save names with missing email addresses
     resting_reindeers = []
@@ -298,7 +298,7 @@ def import_template(ext, path=".", enc=None):
     """Import the first files with a specific file extension in a given folder
 
     Find all the files in a folder with a specific file extension, e.g. ".txt",
-    in a specifc folder, return the first file found, and load it into the
+    in a specific folder, return the first file found, and load it into the
     script.
 
     Args:
@@ -349,11 +349,6 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
     # Get the plain text, and HTML email templates
     plain_body = import_template(".txt", "./templates")
     html_body = import_template(".html", "./templates", "utf8")
-
-    # Open the GitHub icon, create a MIME image, and add a content ID
-    with open("GitHub-Mark-32px.png", "rb") as png:
-        octocat_icon = MIMEImage(png.read())
-    octocat_icon.add_header("Content-ID", "<Octocat>")
 
     # Open a connection to the email server, and send the email
     santas_server = smtplib.SMTP("smtp.gmail.com", 587)
@@ -412,9 +407,6 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
                                           "html"))
         santas_letter_rel.attach(santas_picture)
 
-        # Attach the octocat logo to the relative part
-        santas_letter_rel.attach(octocat_icon)
-
         print("Sending letter to a Secret Santa...")
 
         # Send email to sender
@@ -471,7 +463,7 @@ else:
     secret_santas_mailbox = sys.argv[1]
 
 # Import Secret Santas names, and their corresponding email addresses. Note
-# existing columns are forceably renamed to "santas", and "reindeers", so
+# existing columns are forcibly renamed to "santas", and "reindeers", so
 # first column should have Secret Santa names, and second column should have
 # their email addresses
 secret_santa_sleighs = pd.read_csv(sys.argv[2],
