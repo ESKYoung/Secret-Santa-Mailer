@@ -224,9 +224,9 @@ def mime_giphy():
     giphy_id = giphy_data["data"]["id"]
 
     # Download the GIF to the local directory
-    giphy_filename, _ = urllib.request.urlretrieve(giphy_link, giphy_id +
-                                                   ".gif")
-
+    giphy_filename, _ = urllib.request.urlretrieve(giphy_link, "./images/" +
+                                                   giphy_id + ".gif")
+                                                   
     # Open the GIF, and create a MIME image
     with open(giphy_filename, "rb") as gif:
         santas_picture = MIMEImage(gif.read())
