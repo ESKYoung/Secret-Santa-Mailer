@@ -19,7 +19,7 @@ Example:
     To run this script execute:
 
         $ python secret_santa_mailer.py <<<EMAIL ADDRESS>>> <<<INPUT FILE>>>
-    
+
     where <<<EMAIL ADDRESS>>> is the Secret Santa Gmail mailbox, and
     <<<INPUT FILE>>> is a CSV containing the Secret Santa names, and their email
     addresses.
@@ -313,7 +313,7 @@ def import_template(ext, path=".", enc=None):
     # Get the first file with extension "ext" in the "path"
     template_filename = [template for template in os.listdir(path) if
                          template.endswith(ext)][0]
-    
+
     # Import the template
     with open(path + "/" + template_filename, "r", encoding=enc) as f:
         template_body = f.read()
@@ -470,7 +470,10 @@ if re.search(r"(^[a-zA-Z0-9_.+-]+@gmail.com$)", sys.argv[1]) is None:
 else:
     secret_santas_mailbox = sys.argv[1]
 
-# Import Secret Santas names, and their corresponding email addresses
+# Import Secret Santas names, and their corresponding email addresses. Note
+# existing columns are forceably renamed to "santas", and "reindeers", so
+# first column should have Secret Santa names, and second column should have
+# their email addresses
 secret_santa_sleighs = pd.read_csv(sys.argv[2],
                                    names=["santas", "reindeers"], header=0)
 secret_santas = secret_santa_sleighs.santas.tolist()
