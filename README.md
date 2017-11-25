@@ -1,4 +1,4 @@
-# Secret Santa Mailer :santa:
+# Secret Santa Mailer
 
 Double-blind random selection to pair a list of Secret Santas with each other. Each Secret Santa is emailed their randomly-selected gift recipient directly.
 
@@ -28,10 +28,12 @@ You need the following to run this code:
 Navigate to your local repository using command line or your Python IDE, then run this code:
 
 ~~~
-python secret_santa_mailer.py <<<EMAIL ADDRESS>> <<<CSV FILENAME>>>
+python secret_santa_mailer.py <<<EMAIL ADDRESS>> <<<CSV FILENAME>>> <<<KEEP GIFS VALUE>>>
 ~~~
 
-where ``<<<EMAIL ADDRESS>>>`` is a valid mailbox from where emails are sent to each Secret Santa, and ``<<<CSV FILENAME>>>`` is the ``.csv`` file from Step 4, including the full path if it's not in your working directory.
+where ``<<<EMAIL ADDRESS>>>`` is a valid mailbox from where emails are sent to each Secret Santa, and ``<<<CSV FILENAME>>>`` is the ``.csv`` file from Step 4, including the full path if it's not in your working directory. **Both parameters are required**.
+
+``<<<KEEP GIFS VALUE>>>`` is *optional*; if this value is set to ``1``, ``GIF``s in the emails are saved, otherwise they're deleted as soon as they been embedded.
 
 ## How it works
 
@@ -49,7 +51,7 @@ This ``secret_santa_mailer`` function works as follows:
 2. ``check_reindeers`` ensures email addresses are valid;  
 3. ``secret_santa_pairings`` randomly pairs Secret Santas with each other; and
 4. ``call_postman`` generates an email for each Secret Santa telling them of their chosen gift recipient, with an embedded festive ``GIF``.
-    * ``mime_giphy`` temporarily downloads a random, PG-13 or safer festive ``GIF``, generates a MIME image, and then deletes the downloaded image
+    * ``mime_giphy`` temporarily downloads a random, PG-13 or safer, festive ``GIF``, and generates a MIME image.
 
 ### Other criteria
 
