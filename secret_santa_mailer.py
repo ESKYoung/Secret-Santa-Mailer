@@ -22,10 +22,10 @@ Example:
             <<<KEEP GIFS VALUE>>>
 
     where <<<EMAIL ADDRESS>>> is the outgoing Secret Santa Gmail mailbox, and
-    <<<INPUT FILE>>> is a CSV containing the Secret Santa names, and their email
-    addresses. <<<KEEP GIFS VALUE>>> is optional; if it's set to 1, all GIFs
-    that are embedded into the emails are saved locally, otherwise they are only
-    temporarily stored until the emails have been generated.
+    <<<CSV FILENAME>>> is a CSV containing the Secret Santa names, and their
+    email addresses. <<<KEEP GIFS VALUE>>> is optional; if it's set to 1, all
+    GIFs that are embedded into the emails are saved locally, otherwise they are
+    only temporarily stored until the emails have been generated.
 
 Attributes:
 
