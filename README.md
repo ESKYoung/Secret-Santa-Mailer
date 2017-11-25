@@ -4,6 +4,8 @@ Double-blind random selection to pair a list of Secret Santas with each other. E
 
 ## Getting started
 
+### Prerequisites
+
 You need the following to run this code:
 
 1. Python 3 either through command line or your favourite IDE;
