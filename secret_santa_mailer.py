@@ -19,10 +19,13 @@ Example:
     To run this script execute:
 
         $ python secret_santa_mailer.py <<<EMAIL ADDRESS>>> <<<INPUT FILE>>>
+            <<<KEEP GIFS VALUE>>>
 
     where <<<EMAIL ADDRESS>>> is the Secret Santa Gmail mailbox, and
     <<<INPUT FILE>>> is a CSV containing the Secret Santa names, and their email
-    addresses.
+    addresses. <<<KEEP GIFS VALUE>>> is optional; if it's set to 1, all GIFs
+    that are embedded into the emails are saved locally, otherwise they are only
+    temporarily stored until the emails have been generated.
 
 Attributes:
 
@@ -226,7 +229,7 @@ def mime_giphy():
     # Download the GIF to the local directory
     giphy_filename, _ = urllib.request.urlretrieve(giphy_link, "./images/" +
                                                    giphy_id + ".gif")
-                                                   
+
     # Open the GIF, and create a MIME image
     with open(giphy_filename, "rb") as gif:
         santas_picture = MIMEImage(gif.read())
@@ -235,7 +238,7 @@ def mime_giphy():
     santas_picture.add_header("Content-ID", ("<" + giphy_id + ">"))
 
     # Delete the downloaded GIF - prevent storage of lots of GIFs at the end
-    os.remove(giphy_filename)
+    os.remove(giphy_filename) if not keep_gifs else None
 
     # Return both the downloaded filename, and the GIPHY URL
     return santas_picture, giphy_link, giphy_id
@@ -447,8 +450,8 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox):
     secret_santa_pairings = secret_santa_randomiser(sleighs)
 
     # Check that the user wants to send out the messages
-    continue_checker("Secret Santa randomisation complete!", "OK, maybe next " +
-                     "time then!")
+    continue_checker("Secret Santa randomisation complete! Time to call the " +
+                     "postman!", "OK, maybe next " + "time then!")
 
     # Send emails out to the giver notifying them of their receiver
     call_postman(santas_mailbox, sleighs, secret_santa_pairings)
@@ -470,6 +473,12 @@ secret_santa_sleighs = pd.read_csv(sys.argv[2],
                                    names=["santas", "reindeers"], header=0)
 secret_santas = secret_santa_sleighs.santas.tolist()
 secret_reindeers = secret_santa_sleighs.reindeers.tolist()
+
+# See if the user wants to keep the downloaded GIFs from GIPHY
+try:
+    keep_gifs = True if int(sys.argv[3]) == 1 else False
+except IndexError:
+    keep_gifs = False
 
 # Obtain the password for the Secret Santa mailbox, and the GIPHY API token
 santas_key = getpass.getpass("Santa's secret key [Enter email password]: ")
