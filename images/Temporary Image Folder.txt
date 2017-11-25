@@ -1,0 +1,1 @@
+Folder temporarily stores GIFs before they are embedded in the Secret Santa emails.
