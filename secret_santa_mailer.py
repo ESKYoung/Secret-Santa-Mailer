@@ -18,7 +18,7 @@ The module requires:
 Example:
     To run this script execute:
 
-        $ python secret_santa_mailer.py <<<EMAIL ADDRESS>>> <<<INPUT FILE>>>
+        $ python secret_santa_mailer.py <<<EMAIL ADDRESS>>> <<<CSV FILENAME>>>
             <<<KEEP GIFS VALUE>>>
 
     where <<<EMAIL ADDRESS>>> is the Secret Santa Gmail mailbox, and
