@@ -4,10 +4,6 @@ Double-blind random selection to pair a list of Secret Santas with each other. E
 
 ## Getting started
 
-Here's how to get the Secret Santa Mailer up and running on your system.
-
-### Prerequisites
-
 You need the following to run this code:
 
 1. Python 3 either through command line or your favourite IDE;
@@ -16,12 +12,16 @@ You need the following to run this code:
 4. ``.csv`` file with Secret Santas' names and emails &dagger;;
     * Add a header row - any will do!
     * Add data from Row 2 onwards
-    * First column should have **unique** Secret Santa names
-    * Second column should have their email address - *duplicates are allowed*
+    * First column should be names, second column should be email addresses
+    * Use the repository's [template](templates/Secret_Santa_Template.csv) if you'd like!
 5. Access to a suitably festive mailbox; and
 6. A GIPHY API token &mdash; get one [here](https://developers.giphy.com)!
 
-&dagger; Use the repo's [template](templates/Secret_Santa_Template.csv) if you'd like!
+To ensure everything runs smoothly, remember the code:
+
+* Requires a minimum of two names, and they should all be **unique**;
+* Accepts only valid email addresses, but there can be duplicates; and
+* Is currently setup for Gmail accounts only;.
 
 ### Running the code
 
@@ -52,13 +52,6 @@ This ``secret_santa_mailer`` function works as follows:
 3. ``secret_santa_pairings`` randomly pairs Secret Santas with each other; and
 4. ``call_postman`` generates an email for each Secret Santa telling them of their chosen gift recipient, with an embedded festive ``GIF``.
     * ``mime_giphy`` temporarily downloads a random, PG-13 or safer, festive ``GIF``, and generates a MIME image.
-
-### Other criteria
-
-* Minimum of two names required;
-* Only accepts valid email addresses;
-* Names must be unique, but email addresses can be duplicates; and
-* Currently setup for Gmail accounts only.
 
 ## Running the tests
 
