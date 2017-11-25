@@ -21,7 +21,7 @@ Example:
         $ python secret_santa_mailer.py <<<EMAIL ADDRESS>>> <<<CSV FILENAME>>>
             <<<KEEP GIFS VALUE>>>
 
-    where <<<EMAIL ADDRESS>>> is the Secret Santa Gmail mailbox, and
+    where <<<EMAIL ADDRESS>>> is the outgoing Secret Santa Gmail mailbox, and
     <<<INPUT FILE>>> is a CSV containing the Secret Santa names, and their email
     addresses. <<<KEEP GIFS VALUE>>> is optional; if it's set to 1, all GIFs
     that are embedded into the emails are saved locally, otherwise they are only
