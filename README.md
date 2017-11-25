@@ -31,7 +31,7 @@ Navigate to your local repository using command line or your Python IDE, then ru
 python secret_santa_mailer.py <<<EMAIL ADDRESS>> <<<CSV FILENAME>>>
 ~~~
 
-where ``<<<EMAIL ADDRESS>>>`` is a valid mailbox from where emails are sent to each Secret Santa, and ``<<<CSV FILENAME>>>`` is the ``.csv`` file from Step 4, including the full path if it's not in your local repo.
+where ``<<<EMAIL ADDRESS>>>`` is a valid mailbox from where emails are sent to each Secret Santa, and ``<<<CSV FILENAME>>>`` is the ``.csv`` file from Step 4, including the full path if it's not in your working directory.
 
 ## How it works
 
@@ -43,7 +43,7 @@ TBC
 
 ## License
 
-This repository is licensed under the MIT License - see [LICENSE.md](LICENSE.md) file for details.
+This repository is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
 
