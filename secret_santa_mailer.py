@@ -12,31 +12,33 @@ formats, with a festive GIF (PG-rated) embedded in the latter.
 
 The module requires:
     * A two-column CSV file of Secret Santa names, and their email addresses
-    * A TXT file for the plain text email body, named
-      "Secret_Santa_Email_Body.txt"
-    * A HTML file for the HTML email body, named "Secret_Santa_Email_Body.html"
+    * A TXT file for the plain text email body
+    * A HTML file for the HTML email body
 
 Example:
     To run this script execute:
-        $ python secret_santa_mailer.py <email address> <input file>
-    where <email address> is the Secret Santa Gmail mailbox, and <input file>
-    is a CSV containing the Secret Santa names, and their email addresses.
+
+        $ python secret_santa_mailer.py <<<EMAIL ADDRESS>>> <<<INPUT FILE>>>
+    
+    where <<<EMAIL ADDRESS>>> is the Secret Santa Gmail mailbox, and
+    <<<INPUT FILE>>> is a CSV containing the Secret Santa names, and their email
+    addresses.
 
 Attributes:
 
 """
-import sys
-import pandas as pd
-import secrets
-import re
-import smtplib
-import urllib.request
+import getpass
 import json
 import os
-import getpass
+import pandas as pd
+import re
+import secrets
+import smtplib
+import sys
+import urllib.request
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
 
 
 def continue_checker(message, exit_message):
@@ -269,11 +271,10 @@ def secret_santa_randomiser(sleighs):
                                 if santa not in givers])
         givers.append(giver)
 
-        """ Check if there are an odd number of Secret Santas, and the while
-        loop is on the penultimate iteration. If this is the case, only pick a
-        receiver who was not a giver in previous iterations. Prevents A>B, B>A,
-        and C on their own.
-        Otherwise, randomly select a receiver."""
+        # Check if there are an odd number of Secret Santas, and the while
+        # loop is on the penultimate iteration. If this is the case, only pick a
+        # receiver who was not a giver in previous iterations. Prevents A>B,
+        # B>A, and C on their own. Otherwise, randomly select a receiver.
         if odd_santa_flag and len(givers) == len(sleighs.keys()) - 1 \
                 and giver in receivers:
             receiver = [santa for santa in sleighs.keys()
@@ -291,6 +292,34 @@ def secret_santa_randomiser(sleighs):
 
     # Return a dictionary of givers as keys, and receivers as items
     return santa_pairings
+
+
+def import_template(ext, path=".", enc=None):
+    """Import the first files with a specific file extension in a given folder
+
+    Find all the files in a folder with a specific file extension, e.g. ".txt",
+    in a specifc folder, return the first file found, and load it into the
+    script.
+
+    Args:
+        ext (str): Extension of the filename required, e.g. ".txt" or ".html".
+        path (str): Path to the folder where the file(s) are located, e.g.
+            "./templates".
+        enc (str): Encoding format used in the Python "open" built-in function.
+
+    Yields:
+        template_body (str): Imported file as desired.
+    """
+    # Get the first file with extension "ext" in the "path"
+    template_filename = [template for template in os.listdir(path) if
+                         template.endswith(ext)][0]
+    
+    # Import the template
+    with open(path + "/" + template_filename, "r", encoding=enc) as f:
+        template_body = f.read()
+
+    # Return the imported file
+    return template_body
 
 
 def call_postman(santas_mailbox, sleighs, santa_pairings):
@@ -317,13 +346,9 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
         A sent email message for each Secret Santa, notifying them of their
         randomly assigned gift receiver.
     """
-    # Import the plain text email message template
-    with open("Secret_Santa_Email_Body.txt", "r") as f:
-        plain_body = f.read()
-
-    # Import the HTML email message template
-    with open("Secret_Santa_Email_Body.html", "r", encoding="utf8") as f:
-        html_body = f.read()
+    # Get the plain text, and HTML email templates
+    plain_body = import_template(".txt", "./templates")
+    html_body = import_template(".html", "./templates", "utf8")
 
     # Open the GitHub icon, create a MIME image, and add a content ID
     with open("GitHub-Mark-32px.png", "rb") as png:
@@ -336,8 +361,8 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
     santas_server.starttls()
     santas_server.login(santas_mailbox, santas_key)
 
-    """Iterate through each Secret Santa giver, and send them an email with
-    their selected receiver"""
+    # Iterate through each Secret Santa giver, and send them an email with
+    # their selected receiver
     for giver in santa_pairings:
         # Extract the giver's email address, and their receiver
         giver_mailbox = sleighs[giver]
@@ -346,17 +371,15 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
         # Get a random festive GIF using the GIPHY API in a MIME image format
         santas_picture, giphy_link, giphy_id = mime_giphy()
 
-        """To ensure the HTML version is preferential, first setup a mixed MIME
-        message to contain the essentials, e.g. "From", "To", "Subject".
-
-        Then generate an alternative MIME subpart to hold plain text, and HTML
-        versions of the email. The plain text comes first to ensure HTML is
-        preferential.
-
-        As there is an embedded image in the HTML version, a related MIME
-        section is added that is a subpart of the alternative MIME subpart.
-        This ensures the HTML version is still preferential, and the embedded
-        image is displayed."""
+        # To ensure the HTML version is preferential, first setup a mixed MIME
+        # message to contain the essentials, e.g. "From", "To", "Subject".
+        # Then generate an alternative MIME subpart to hold plain text, and HTML
+        # versions of the email. The plain text comes first to ensure HTML is
+        # preferential.
+        # As there is an embedded image in the HTML version, a related MIME
+        # section is added that is a subpart of the alternative MIME subpart.
+        # This ensures the HTML version is still preferential, and the embedded
+        # image is displayed.
 
         # Initialise a mixed MIME message
         santas_letter = MIMEMultipart("mixed")
@@ -376,8 +399,8 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
                                                             link=giphy_link),
                                           "plain"))
 
-        """Initialise an related subpart of the alternative subpart of the MIME
-        message, and attach it"""
+        # Initialise an related subpart of the alternative subpart of the MIME
+        # message, and attach it
         santas_letter_rel = MIMEMultipart("related")
         santas_letter_alt.attach(santas_letter_rel)
 
