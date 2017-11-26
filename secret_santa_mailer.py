@@ -276,9 +276,13 @@ def secret_santa_randomiser(sleighs):
         # iterations. Prevents A>B, B>A, and C on their own. Otherwise, randomly
         # select a receiver.
         if len(givers) == len(sleighs.keys()) - 1 and giver in receivers:
-            receiver = [santa for santa in sleighs.keys()
-                        if santa not in receivers +
-                        [giver, givers[receivers.index(giver)]]][0]
+            last_receivers = [santa for santa in sleighs.keys()
+                              if santa not in receivers +
+                              [giver, givers[receivers.index(giver)]]]
+            if sorted(givers) == sorted(receivers + [last_receivers[0]]):
+                receiver = last_receivers[1]
+            else:
+                receiver = last_receivers[0]
         else:
             receiver = secrets.choice([santa for santa in sleighs.keys()
                                        if santa not in receivers + [giver]])
