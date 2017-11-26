@@ -49,7 +49,7 @@ Here's how the code works:
 
 This ``secret_santa_mailer`` function works as follows:
 
-1. ``find_santas`` and ``find_reindeers`` check enough names, and email addresses were supplied;
+1. ``find_sleighs`` checks enough names, and email addresses were supplied;
 2. ``check_reindeers`` ensures email addresses are valid;  
 3. ``secret_santa_pairings`` randomly pairs Secret Santas with each other; and
 4. ``call_postman`` generates an email for each Secret Santa telling them of their chosen gift recipient, with an embedded festive ``GIF``.
