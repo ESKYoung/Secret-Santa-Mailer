@@ -1,8 +1,10 @@
-# CSV files containing Secret Santa data
-*.csv
+# Ignore CSV files in the current working directory containing personal Secret
+# Santa data
+/*.csv
+
+# However, keep the Secret Santa template CSV
+!.gitignore
+!templates/
 
 # Temporary GIF files from GIPHY
 *.gif
-
-# GitHub Octocat logo; available from:
-*.png
