@@ -11,7 +11,7 @@ You need the following to run this code:
 1. Python 3;
 2. The ``pandas`` module;
 3. Local clone of this repository;
-4. ``.csv`` file with Secret Santas' names and emails &dagger;;
+4. ``.csv`` file with Secret Santas' names and emails;
     * Add a header row - any will do!
     * Add data from Row 2 onwards
     * First column should be names, second column should be email addresses
