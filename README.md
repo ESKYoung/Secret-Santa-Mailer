@@ -8,7 +8,7 @@ Double-blind random selection to pair a list of Secret Santas with each other. E
 
 You need the following to run this code:
 
-1. Python 3 either through command line or your favourite IDE;
+1. Python 3;
 2. The ``pandas`` module;
 3. Local clone of this repository;
 4. ``.csv`` file with Secret Santas' names and emails &dagger;;
@@ -27,7 +27,7 @@ To ensure everything runs smoothly, remember the code:
 
 ### Running the code
 
-Navigate to your local repository using command line or your Python IDE, then run this code:
+Navigate to your local repository using command line, then run this code:
 
 ~~~
 python secret_santa_mailer.py <<<EMAIL ADDRESS>> <<<CSV FILENAME>>> <<<KEEP GIFS VALUE>>>
@@ -57,7 +57,11 @@ This ``secret_santa_mailer`` function works as follows:
 
 ## Running the tests
 
-TBC
+To run the unit tests, navigate to your local repository using command line, then run this code:
+
+~~~
+python -m unittest tests_secret_santa_mailer
+~~~
 
 ## License
 
