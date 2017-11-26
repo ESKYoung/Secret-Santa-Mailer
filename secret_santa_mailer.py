@@ -71,23 +71,32 @@ def continue_checker(message, exit_message):
         sys.exit(exit_message)
 
 
-def find_santas(reindeers, sleighs):
-    """Check enough Secret Santas were supplied
+def find_sleighs(santas, reindeers, sleighs):
+    """Check enough Secret Santas, and reindeers were supplied
 
     Check that the number of Secret Santas [names] matches the number of
-    reindeers [email address].
+    reindeers [email address]. Check that the number of reindeer
+    [email addresses] supplied matches the number of Secret Santas [names].
 
     Args:
+        santas (list): List of Secret Santa names.
         reindeers (list): List of email addresses.
         sleighs (dict): Dictionary with names as keys, and email addresses as
             items. If everything is correct, items should match "reindeers".
 
     Yields:
-        Give a message if there are duplicate email addresses. If there are
+        If there are duplicate Secret Santas, throw an error message. Give a
+        message if there are duplicate email addresses. If there are fewer email
+        addresses than names, each name missing an email address is printed,
+        before exiting the system, and throwing an error message.  If there are
         fewer names than email addresses, exit the system, and throw an error
         message. If there are less than two Secret Santas, throw an error
-        message. Otherwise, print a statement that everything is okay.
+        message. Otherwise, print statements that everything is okay.
     """
+    # Check for duplicate names, and throw an error if there any duplicates
+    if len(santas) != len(set(santas)):
+        sys.exit("There's an impostor! [All Secret Santas must be unique]")
+
     # Check for duplicate messages, and ask the user if they want to continue
     if len(reindeers) != len(set(reindeers)):
         continue_checker("Some reindeers are twins! [Duplicate email " +
@@ -107,28 +116,6 @@ def find_santas(reindeers, sleighs):
                  "Secret Santas required]")
     else:
         print("All Secret Santas present!")
-
-
-def find_reindeers(santas, sleighs):
-    """Check enough reindeers were supplied
-
-    Check that the number of reindeer [email addresses] supplied matches the
-    number of Secret Santas [names].
-
-    Args:
-        santas (list): List of Secret Santa names.
-        sleighs (dict): Dictionary with names as keys, and email addresses as
-            items. If everything is correct, keys should match "santas".
-
-    Yields:
-        If there are duplicate Secret Santas, throw an error message. If there
-        are fewer email addresses than names, each name missing an email address
-        is printed, before exiting the system, and throwing an error message.
-        Otherwise, print a statement that everything is okay.
-    """
-    # Check for duplicate names, and throw an error if there any duplicates
-    if len(santas) != len(set(santas)):
-        sys.exit("There's an impostor! [All Secret Santas must be unique]")
 
     # Initialise a storage list to save names with missing email addresses
     resting_reindeers = []
@@ -442,8 +429,7 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox):
     sleighs = dict(zip(secret_santas, secret_reindeers))
 
     # Run checks on the names and email addresses
-    find_santas(reindeers, sleighs)
-    find_reindeers(santas, sleighs)
+    find_sleighs(santas, reindeers, sleighs)
     check_reindeers(sleighs)
 
     # Pair Secret Santas with each other randomly
@@ -487,6 +473,12 @@ if __name__ == '__main__':
     santas_key = getpass.getpass("Santa's secret key [Enter email password]: ")
     giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
                                        "[Enter GIPHY API token]: "))
+    
+    # Print messages to list all the loaded data, and then check to proceed
+    print("Here's our Secret Santas:\n")
+    print(secret_santa_sleighs)
+    continue_checker("All data loaded, ready to check the sleighs!", "Ok, " + 
+                     "maybe next time then!")
 
     # Execute function
     secret_santa_mailer(secret_santas
