@@ -459,10 +459,15 @@ if __name__ == '__main__':
     # first column should have Secret Santa names, and second column should have
     # their email addresses
     secret_santa_sleighs = pd.read_csv(sys.argv[2],
-                                       names=["santas", "reindeers"], header=0)
+                                       names=["santas", "reindeers"], header=0, 
+                                       skipinitialspace=True)
     secret_santas = secret_santa_sleighs.santas.tolist()
     secret_reindeers = secret_santa_sleighs.reindeers.tolist()
 
+    # Strip any whitespace in the name or email address columns
+    secret_santas = [santa.strip(' ') for santa in secret_santas]
+    secret_reindeers = [reindeer.strip(' ') for reindeer in secret_reindeers]
+    
     # See if the user wants to keep the downloaded GIFs from GIPHY
     try:
         keep_gifs = True if int(sys.argv[3]) == 1 else False
@@ -473,11 +478,12 @@ if __name__ == '__main__':
     santas_key = getpass.getpass("Santa's secret key [Enter email password]: ")
     giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
                                        "[Enter GIPHY API token]: "))
-    
+
     # Print messages to list all the loaded data, and then check to proceed
     print("Here's our Secret Santas:\n")
-    print(secret_santa_sleighs)
-    continue_checker("All data loaded, ready to check the sleighs!", "Ok, " + 
+    print(pd.DataFrame({"1. Secret Santas": secret_santas,
+                        "2. Email addresses": secret_reindeers}))
+    continue_checker("All data loaded, ready to check the sleighs!", "Ok, " +
                      "maybe next time then!")
 
     # Execute function
