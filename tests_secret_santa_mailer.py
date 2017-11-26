@@ -46,8 +46,21 @@ class ContinueCheckerTests(unittest.TestCase):
         self.assertEqual(cm.exception.code, "Exit Message")
 
 
-class FindSantasTest(unittest.TestCase):
-    """Unit tests for the find_santas function"""
+class FindSleighsTest(unittest.TestCase):
+    """Unit tests for the find_sleighs function"""
+
+    def test_Dup_Names(self):
+        """Check for duplicate names
+
+        Check a SystemExit and appropriate exit message are shown if there are
+        duplicate names."""
+        santas = ["A", "A"]
+        reindeers = ["a", "b"]
+        sleighs = dict(zip(santas, reindeers))
+        with self.assertRaises(SystemExit) as cm:
+            secret_santa_mailer.find_sleighs(santas, reindeers, sleighs)
+        self.assertEqual(cm.exception.code, ("There's an impostor! [All " +
+                                             "Secret Santas must be unique]"))
 
     def test_Dup_Emails(self):
         """Check for duplicate email addresses
@@ -58,7 +71,7 @@ class FindSantasTest(unittest.TestCase):
         reindeers = ["a", "a"]
         sleighs = dict(zip(santas, reindeers))
         with patch.object(secret_santa_mailer, "continue_checker") as mock:
-            secret_santa_mailer.find_santas(reindeers, sleighs)
+            secret_santa_mailer.find_sleighs(santas, reindeers, sleighs)
         mock.assert_called_with(("Some reindeers are twins! [Duplicate email " +
                                  "addresses]"), ("Unexpectedly found twin " +
                                                  "reindeers! [Duplicate " +
@@ -73,7 +86,7 @@ class FindSantasTest(unittest.TestCase):
         reindeers = ["a", "b", "c"]
         sleighs = dict(zip(santas, reindeers))
         with self.assertRaises(SystemExit) as cm:
-            secret_santa_mailer.find_santas(reindeers, sleighs)
+            secret_santa_mailer.find_sleighs(santas, reindeers, sleighs)
         self.assertEqual(cm.exception.code, ("Mrs Claus says some Secret " +
                                              "Santas is resting by the " +
                                              "fireplace... [Missing 1 " +
@@ -88,60 +101,34 @@ class FindSantasTest(unittest.TestCase):
         reindeers = ["a"]
         sleighs = dict(zip(santas, reindeers))
         with self.assertRaises(SystemExit) as cm:
-            secret_santa_mailer.find_santas(reindeers, sleighs)
+            secret_santa_mailer.find_sleighs(santas, reindeers, sleighs)
         self.assertEqual(cm.exception.code, ("Not enough Secret Santas for " +
                                              "the delivery! [Minimum of two " +
                                              "Secret Santas required]"))
-
-    def test_Pass(self):
-        """Check the function passes normally
-
-        Check the function passes normally."""
-        santas = ["A", "B", "C"]
-        reindeers = ["a", "b", "c"]
-        sleighs = dict(zip(santas, reindeers))
-        self.assertEqual(secret_santa_mailer.find_santas(reindeers, sleighs),
-                         None)
-
-
-class FindReindeersTests(unittest.TestCase):
-    """Unit tests for the find_reindeers function"""
-
-    def test_Dup_Names(self):
-        """Check for duplicate names
-
-        Check a SystemExit and appropriate exit message are shown if there are
-        duplicate names."""
-        santas = ["A", "A"]
-        reindeers = ["a", "b"]
-        sleighs = dict(zip(santas, reindeers))
-        with self.assertRaises(SystemExit) as cm:
-            secret_santa_mailer.find_reindeers(santas, sleighs)
-        self.assertEqual(cm.exception.code, ("There's an impostor! [All " +
-                         "Secret Santas must be unique]"))
 
     def test_Miss_Emails(self):
         """Check for missing email addresses
 
         Check a SystemExit and appropriate exit message are shown if there are
         missing email addresses."""
-        santas = ["A", "B"]
-        reindeers = ["a"]
+        santas = ["A", "B", "C"]
+        reindeers = ["a", "b"]
         sleighs = dict(zip(santas, reindeers))
         with self.assertRaises(SystemExit) as cm:
-            secret_santa_mailer.find_reindeers(santas, sleighs)
+            secret_santa_mailer.find_sleighs(santas, reindeers, sleighs)
         self.assertEqual(cm.exception.code, ("There are reindeer resting in " +
-                         "the barn... [Missing 1 email address(es)]"))
+                                             "the barn... [Missing 1 email " +
+                                             "address(es)]"))
 
     def test_Pass(self):
         """Check the function passes normally
 
-        Check the function passes normally."""
-        santas = ["A", "B", "C", "D"]
-        reindeers = ["a", "b", "c", "d"]
+            Check the function passes normally."""
+        santas = ["A", "B", "C"]
+        reindeers = ["a", "b", "c"]
         sleighs = dict(zip(santas, reindeers))
-        self.assertEqual(secret_santa_mailer.find_reindeers(santas, sleighs),
-                         None)
+        self.assertEqual(secret_santa_mailer.find_sleighs(santas, reindeers,
+                                                          sleighs), None)
 
 
 class CheckReindeersTest(unittest.TestCase):
@@ -158,7 +145,8 @@ class CheckReindeersTest(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             secret_santa_mailer.check_reindeers(sleighs)
         self.assertEqual(cm.exception.code, ("There are poorly reindeer at " +
-                         "the vet's... [1 invalid email address(es)]"))
+                                             "the vet's... [1 invalid email " +
+                                             "address(es)]"))
 
     def test_Pass(self):
         """Check the function passes normally
@@ -194,13 +182,17 @@ class SecretSantaRandomiserTest(unittest.TestCase):
 
         Test function with odd number of Secret Santas, looping over 10,000
         times to ensure randomisation process operates correctly."""
-        santas = ["A", "B", "C", "D", "E"]
-        reindeers = ["a", "b", "c", "d", "e"]
+        santas = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", 
+                  "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", 
+                  "Y"]
+        reindeers = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", 
+                     "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", 
+                     "w", "x", "y"]
         sleighs = dict(zip(santas, reindeers))
         for i in range(9999):
             pairings = secret_santa_mailer.secret_santa_randomiser(sleighs)
-            self.assertEqual(len(pairings.keys()), 5)
-            self.assertEqual(len(pairings.values()), 5)
+            self.assertEqual(len(pairings.keys()), 25)
+            self.assertEqual(len(pairings.values()), 25)
             self.assertEqual(set(sleighs.keys()) == set(pairings.keys()), True)
             self.assertEqual(set(sleighs.keys()) == set(pairings.values()),
                              True)
@@ -211,13 +203,17 @@ class SecretSantaRandomiserTest(unittest.TestCase):
 
         Test function with even number of Secret Santas, looping over 10,000
         times to ensure randomisation process operates correctly."""
-        santas = ["A", "B", "C", "D", "E", "F"]
-        reindeers = ["a", "b", "c", "d", "e", "f"]
+        santas = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", 
+                  "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", 
+                  "Y", "Z"]
+        reindeers = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", 
+                     "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", 
+                     "w", "x", "y", "z"]
         sleighs = dict(zip(santas, reindeers))
         for i in range(9999):
             pairings = secret_santa_mailer.secret_santa_randomiser(sleighs)
-            self.assertEqual(len(pairings.keys()), 6)
-            self.assertEqual(len(pairings.values()), 6)
+            self.assertEqual(len(pairings.keys()), 26)
+            self.assertEqual(len(pairings.values()), 26)
             self.assertEqual(set(sleighs.keys()) == set(pairings.keys()), True)
             self.assertEqual(set(sleighs.keys()) == set(pairings.values()),
                              True)
@@ -254,19 +250,18 @@ def gen_tests_suite():
     tests_suite = unittest.TestSuite()
 
     # Create a list of all unit test classes
-    test_classes = [ContinueCheckerTests
-                    , FindSantasTest
-                    , FindReindeersTests
-                    , CheckReindeersTest
-                    , MimeGiphyTest
-                    , SecretSantaRandomiserTest
-                    , ImportTemplateTest
-                    , CallPostmanTest
-                    , SecretSantaMailerTest]
+    test_classes = [ContinueCheckerTests,
+                    FindSleighsTest,
+                    CheckReindeersTest,
+                    MimeGiphyTest,
+                    SecretSantaRandomiserTest,
+                    ImportTemplateTest,
+                    CallPostmanTest,
+                    SecretSantaMailerTest]
 
     # Iterate through each unit test class, and load it into the unit test suite
     for test_class in test_classes:
-        test_loader = unittest .TestLoader()
+        test_loader = unittest.TestLoader()
         tests_suite.addTest(test_loader.loadTestsFromTestCase(test_class))
 
     return tests_suite
