@@ -263,9 +263,6 @@ def secret_santa_randomiser(sleighs):
     givers = []
     receivers = []
 
-    # Boolean flag to check for an odd number of Secret Santas
-    odd_santa_flag = len(sleighs.keys()) % 2 != 0
-
     # Iterate through all names until everyone is both giving and receiving
     while len(givers) < len(sleighs.keys()):
 
@@ -274,15 +271,18 @@ def secret_santa_randomiser(sleighs):
                                 if santa not in givers])
         givers.append(giver)
 
-        # Check if there are an odd number of Secret Santas, and the while
-        # loop is on the penultimate iteration. If this is the case, only pick a
-        # receiver who was not a giver in previous iterations. Prevents A>B,
-        # B>A, and C on their own. Otherwise, randomly select a receiver.
-        if odd_santa_flag and len(givers) == len(sleighs.keys()) - 1 \
-                and giver in receivers:
-            receiver = [santa for santa in sleighs.keys()
-                        if santa not in receivers +
-                        [giver, givers[receivers.index(giver)]]][0]
+        # Check if the while loop is on the penultimate iteration. If this is
+        # the case, only pick a receiver who was not a giver in previous
+        # iterations. Prevents A>B, B>A, and C on their own. Otherwise, randomly
+        # select a receiver.
+        if len(givers) == len(sleighs.keys()) - 1 and giver in receivers:
+            last_receivers = [santa for santa in sleighs.keys()
+                              if santa not in receivers +
+                              [giver, givers[receivers.index(giver)]]]
+            if sorted(givers) == sorted(receivers + [last_receivers[0]]):
+                receiver = last_receivers[1]
+            else:
+                receiver = last_receivers[0]
         else:
             receiver = secrets.choice([santa for santa in sleighs.keys()
                                        if santa not in receivers + [giver]])
@@ -459,33 +459,36 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox):
     print("All letters sent - Merry Christmas!")
 
 
-# Gmail account for the Secret Santa mailbox, with validator
-if re.search(r"(^[a-zA-Z0-9_.+-]+@gmail.com$)", sys.argv[1]) is None:
-    sys.exit("Nobody's home... [Invalid Gmail address]")
-else:
-    secret_santas_mailbox = sys.argv[1]
+# Standalone program execution
+if __name__ == '__main__':
 
-# Import Secret Santas names, and their corresponding email addresses. Note
-# existing columns are forcibly renamed to "santas", and "reindeers", so
-# first column should have Secret Santa names, and second column should have
-# their email addresses
-secret_santa_sleighs = pd.read_csv(sys.argv[2],
-                                   names=["santas", "reindeers"], header=0)
-secret_santas = secret_santa_sleighs.santas.tolist()
-secret_reindeers = secret_santa_sleighs.reindeers.tolist()
+    # Gmail account for the Secret Santa mailbox, with validator
+    if re.search(r"(^[a-zA-Z0-9_.+-]+@gmail.com$)", sys.argv[1]) is None:
+        sys.exit("Nobody's home... [Invalid Gmail address]")
+    else:
+        secret_santas_mailbox = sys.argv[1]
 
-# See if the user wants to keep the downloaded GIFs from GIPHY
-try:
-    keep_gifs = True if int(sys.argv[3]) == 1 else False
-except IndexError:
-    keep_gifs = False
+    # Import Secret Santas names, and their corresponding email addresses. Note
+    # existing columns are forcibly renamed to "santas", and "reindeers", so
+    # first column should have Secret Santa names, and second column should have
+    # their email addresses
+    secret_santa_sleighs = pd.read_csv(sys.argv[2],
+                                       names=["santas", "reindeers"], header=0)
+    secret_santas = secret_santa_sleighs.santas.tolist()
+    secret_reindeers = secret_santa_sleighs.reindeers.tolist()
 
-# Obtain the password for the Secret Santa mailbox, and the GIPHY API token
-santas_key = getpass.getpass("Santa's secret key [Enter email password]: ")
-giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
-                                   "[Enter GIPHY API token]: "))
+    # See if the user wants to keep the downloaded GIFs from GIPHY
+    try:
+        keep_gifs = True if int(sys.argv[3]) == 1 else False
+    except IndexError:
+        keep_gifs = False
 
-# Execute function
-secret_santa_mailer(secret_santas
-                    , secret_reindeers
-                    , secret_santas_mailbox)
+    # Obtain the password for the Secret Santa mailbox, and the GIPHY API token
+    santas_key = getpass.getpass("Santa's secret key [Enter email password]: ")
+    giphy_api_token = getpass.getpass(("Pick one of Santa's photo albums " +
+                                       "[Enter GIPHY API token]: "))
+
+    # Execute function
+    secret_santa_mailer(secret_santas
+                        , secret_reindeers
+                        , secret_santas_mailbox)
