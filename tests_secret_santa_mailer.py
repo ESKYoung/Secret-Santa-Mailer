@@ -22,23 +22,38 @@ from urllib.error import HTTPError
 
 
 class ContinueCheckerTests(unittest.TestCase):
+    """Unit tests for the continue_checker function"""
 
     @patch("builtins.input", return_value="Y")
     def test_Yes(self, input):
+        """Check user inputs
+
+        If the user enters "Y", nothing should happen.
+        """
         self.assertEqual(secret_santa_mailer.continue_checker("Message",
                                                               "Exit Message"),
                          None)
 
     @patch("builtins.input", return_value="N")
     def test_No(self, input):
+        """Check user inputs
+
+        If the user enters "N", a SystemExit should be returned, with the
+        appropriate exit message.
+        """
         with self.assertRaises(SystemExit) as cm:
             secret_santa_mailer.continue_checker("Message", "Exit Message")
         self.assertEqual(cm.exception.code, "Exit Message")
 
 
 class FindSantasTest(unittest.TestCase):
+    """Unit tests for the find_santas function"""
 
     def test_Dup_Emails(self):
+        """Check for duplicate email addresses
+
+        Check a print message is shown if duplicate email addresses were
+        inputted. """
         santas = ["A", "B"]
         reindeers = ["a", "a"]
         sleighs = dict(zip(santas, reindeers))
@@ -46,10 +61,14 @@ class FindSantasTest(unittest.TestCase):
             secret_santa_mailer.find_santas(reindeers, sleighs)
         mock.assert_called_with(("Some reindeers are twins! [Duplicate email " +
                                  "addresses]"), ("Unexpectedly found twin " +
-                                 "reindeers! [Duplicate email addresses " +
-                                 "found]"))
+                                                 "reindeers! [Duplicate " +
+                                                 "email addresses found]"))
 
     def test_Miss_Names(self):
+        """Check for missing names
+
+        Check a SystemExit and appropriate exit message are shown if there are
+        missing names."""
         santas = ["A", "B"]
         reindeers = ["a", "b", "c"]
         sleighs = dict(zip(santas, reindeers))
@@ -61,6 +80,10 @@ class FindSantasTest(unittest.TestCase):
                                              "santa(s)]"))
 
     def test_One_Name(self):
+        """Check for only one name
+
+        Check a SystemExit and appropriate exit message are shown if only one
+        Secret Santa was inputted."""
         santas = ["A"]
         reindeers = ["a"]
         sleighs = dict(zip(santas, reindeers))
@@ -71,6 +94,9 @@ class FindSantasTest(unittest.TestCase):
                                              "Secret Santas required]"))
 
     def test_Pass(self):
+        """Check the function passes normally
+
+        Check the function passes normally."""
         santas = ["A", "B", "C"]
         reindeers = ["a", "b", "c"]
         sleighs = dict(zip(santas, reindeers))
@@ -79,8 +105,13 @@ class FindSantasTest(unittest.TestCase):
 
 
 class FindReindeersTests(unittest.TestCase):
+    """Unit tests for the find_reindeers function"""
 
     def test_Dup_Names(self):
+        """Check for duplicate names
+
+        Check a SystemExit and appropriate exit message are shown if there are
+        duplicate names."""
         santas = ["A", "A"]
         reindeers = ["a", "b"]
         sleighs = dict(zip(santas, reindeers))
@@ -90,6 +121,10 @@ class FindReindeersTests(unittest.TestCase):
                          "Secret Santas must be unique]"))
 
     def test_Miss_Emails(self):
+        """Check for missing email addresses
+
+        Check a SystemExit and appropriate exit message are shown if there are
+        missing email addresses."""
         santas = ["A", "B"]
         reindeers = ["a"]
         sleighs = dict(zip(santas, reindeers))
@@ -99,6 +134,9 @@ class FindReindeersTests(unittest.TestCase):
                          "the barn... [Missing 1 email address(es)]"))
 
     def test_Pass(self):
+        """Check the function passes normally
+
+        Check the function passes normally."""
         santas = ["A", "B", "C", "D"]
         reindeers = ["a", "b", "c", "d"]
         sleighs = dict(zip(santas, reindeers))
@@ -107,8 +145,13 @@ class FindReindeersTests(unittest.TestCase):
 
 
 class CheckReindeersTest(unittest.TestCase):
+    """Unit tests for the check_reindeers function"""
 
     def test_Invalid(self):
+        """Check for invalid email addresses
+
+        Check a SystemExit and appropriate exit message are shown if there are
+        invalid email addresses."""
         santas = ["A", "B"]
         reindeers = ["test@test.me", "test.invalid.com"]
         sleighs = dict(zip(santas, reindeers))
@@ -118,6 +161,9 @@ class CheckReindeersTest(unittest.TestCase):
                          "the vet's... [1 invalid email address(es)]"))
 
     def test_Pass(self):
+        """Check the function passes normally
+
+        Check the function passes normally."""
         santas = ["A", "B"]
         reindeers = ["test@test.me", "test@test.io"]
         sleighs = dict(zip(santas, reindeers))
@@ -125,19 +171,29 @@ class CheckReindeersTest(unittest.TestCase):
 
 
 class MimeGiphyTest(unittest.TestCase):
+    """Unit tests for the mime_giphy function"""
 
     def setUp(self):
+        """Set up a fake GIPHY API token"""
         secret_santa_mailer.giphy_api_token = "Test"
 
     def test_Bad_Key(self):
+        """Check the URL request
+
+        Check for a HTTP 403 error when a bad GIPHY API token is submitted."""
         with self.assertRaises(HTTPError) as cm:
             secret_santa_mailer.mime_giphy()
         self.assertEqual(cm.exception.code, 403)
 
 
 class SecretSantaRandomiserTest(unittest.TestCase):
+    """Unit tests for the secret_santa_randomiser function"""
 
     def test_Odd_Santas(self):
+        """Check function runs with an odd number of Secret Santas
+
+        Test function with odd number of Secret Santas, looping over 10,000
+        times to ensure randomisation process operates correctly."""
         santas = ["A", "B", "C", "D", "E"]
         reindeers = ["a", "b", "c", "d", "e"]
         sleighs = dict(zip(santas, reindeers))
@@ -151,6 +207,10 @@ class SecretSantaRandomiserTest(unittest.TestCase):
             self.assertEqual(pairings.keys() != pairings.values(), True)
 
     def test_Even_Santas(self):
+        """Check function runs with an even number of Secret Santas
+
+        Test function with even number of Secret Santas, looping over 10,000
+        times to ensure randomisation process operates correctly."""
         santas = ["A", "B", "C", "D", "E", "F"]
         reindeers = ["a", "b", "c", "d", "e", "f"]
         sleighs = dict(zip(santas, reindeers))
@@ -165,28 +225,35 @@ class SecretSantaRandomiserTest(unittest.TestCase):
 
 
 class ImportTemplateTest(unittest.TestCase):
+    """Unit tests for the import_template function"""
 
     def test_future(self):
         pass
 
 
-
 class CallPostmanTest(unittest.TestCase):
+    """Unit tests for the call_postman function"""
 
     def test_future(self):
         pass
 
 
 class SecretSantaMailerTest(unittest.TestCase):
+    """Unit tests for the secret_santa_mailer function"""
 
     def test_future(self):
         pass
 
 
 def gen_tests_suite():
+    """Create a suite of unit tests
 
+    Add all unit tests into a unit test suite to run later"""
+
+    # Initialise a unit test suite
     tests_suite = unittest.TestSuite()
 
+    # Create a list of all unit test classes
     test_classes = [ContinueCheckerTests
                     , FindSantasTest
                     , FindReindeersTests
@@ -194,17 +261,18 @@ def gen_tests_suite():
                     , MimeGiphyTest
                     , SecretSantaRandomiserTest
                     , ImportTemplateTest
-                    , CallPostmanTest]
+                    , CallPostmanTest
+                    , SecretSantaMailerTest]
 
+    # Iterate through each unit test class, and load it into the unit test suite
     for test_class in test_classes:
-
         test_loader = unittest .TestLoader()
-
         tests_suite.addTest(test_loader.loadTestsFromTestCase(test_class))
 
     return tests_suite
 
 
+# Execute the unit test suite
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()
     runner.run(gen_tests_suite())
