@@ -54,6 +54,10 @@ This ``secret_santa_mailer`` function works as follows:
 3. ``secret_santa_pairings`` randomly pairs Secret Santas with each other; and
 4. ``call_postman`` generates an email for each Secret Santa telling them of their chosen gift recipient, with an embedded festive ``GIF``.
     * ``mime_giphy`` temporarily downloads a random, PG-13 or safer, festive ``GIF``, and generates a MIME image.
+ 
+## Known issues
+
+Although the code doesn't display pairings, you could find this out in the "Sent" folder of your chosen mailbox.
 
 ## Running the tests
 
