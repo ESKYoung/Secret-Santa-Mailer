@@ -35,7 +35,7 @@ python secret_santa_mailer.py <<<EMAIL ADDRESS>> <<<CSV FILENAME>>> <<<KEEP GIFS
 
 where ``<<<EMAIL ADDRESS>>>`` is a valid mailbox from where emails are sent to each Secret Santa, and ``<<<CSV FILENAME>>>`` is the ``.csv`` file from Step 4, including the full path if it's not in your working directory. **Both parameters are required**.
 
-``<<<KEEP GIFS VALUE>>>`` is *optional*; if this value is set to ``1``, ``GIF``s in the emails are saved, otherwise they're deleted as soon as they been embedded.
+``<<<KEEP GIFS VALUE>>>`` is *optional*; if this value is set to ``1``, ``GIF``s in the emails are saved, otherwise they're deleted as soon as they've been embedded.
 
 ## How it works
 
