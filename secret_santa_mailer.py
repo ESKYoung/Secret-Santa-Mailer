@@ -42,6 +42,7 @@ import urllib.request
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import make_msgid
 
 
 def continue_checker(message, exit_message):
@@ -340,6 +341,10 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
     plain_body = import_template(".txt", "./templates")
     html_body = import_template(".html", "./templates", "utf8")
 
+    # Extract the account, and domain names of the mailbox
+    santas_account = re.search(r"(\w.+)@", santas_mailbox)[1]
+    santas_domain = re.search(r"@(\w.+)", santas_mailbox)[1]
+
     # Open a connection to the email server, and send the email
     santas_server = smtplib.SMTP("smtp.gmail.com", 587)
     santas_server.ehlo()
@@ -374,6 +379,11 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
         santas_letter["To"] = giver_mailbox
         santas_letter["Subject"] = "Secret Santa"
 
+        # Add a unique Message ID to the email, that incorporates
+        # "santas-mailbox"
+        santas_letter["Message-ID"] = make_msgid(idstring=santas_account,
+                                                 domain=santas_domain)
+
         # Initialise an alternative subpart of the MIME message, and attach it
         santas_letter_alt = MIMEMultipart("alternative")
         santas_letter.attach(santas_letter_alt)
@@ -405,7 +415,7 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
 
     # Exit server
     santas_server.quit()
-
+    
 
 def secret_santa_mailer(santas, reindeers, santas_mailbox):
     """Check everyone's ready, randomly assign givers and receivers, and send
@@ -459,7 +469,7 @@ if __name__ == '__main__':
     # first column should have Secret Santa names, and second column should have
     # their email addresses
     secret_santa_sleighs = pd.read_csv(sys.argv[2],
-                                       names=["santas", "reindeers"], header=0, 
+                                       names=["santas", "reindeers"], header=0,
                                        skipinitialspace=True)
     secret_santas = secret_santa_sleighs.santas.tolist()
     secret_reindeers = secret_santa_sleighs.reindeers.tolist()
@@ -467,7 +477,7 @@ if __name__ == '__main__':
     # Strip any whitespace in the name or email address columns
     secret_santas = [santa.strip(' ') for santa in secret_santas]
     secret_reindeers = [reindeer.strip(' ') for reindeer in secret_reindeers]
-    
+
     # See if the user wants to keep the downloaded GIFs from GIPHY
     try:
         keep_gifs = True if int(sys.argv[3]) == 1 else False
