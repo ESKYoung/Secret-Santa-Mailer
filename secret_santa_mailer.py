@@ -337,6 +337,10 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
         A sent email message for each Secret Santa, notifying them of their
         randomly assigned gift receiver.
     """
+    # Initialise a storage list to hold all the unique message IDs for
+    # subsequent deletion
+    santas_letters = []
+
     # Get the plain text, and HTML email templates
     plain_body = import_template(".txt", "./templates")
     html_body = import_template(".html", "./templates", "utf8")
@@ -354,6 +358,7 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
     # Iterate through each Secret Santa giver, and send them an email with
     # their selected receiver
     for giver in santa_pairings:
+
         # Extract the giver's email address, and their receiver
         giver_mailbox = sleighs[giver]
         receiver = santa_pairings[giver]
@@ -413,9 +418,12 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
         santas_server.sendmail(santas_mailbox, giver_mailbox,
                                santas_letter.as_string())
 
+        # Append message ID to the storage list
+        santas_letters.append(santas_letter["Message-ID"])
+
     # Exit server
     santas_server.quit()
-    
+
 
 def secret_santa_mailer(santas, reindeers, santas_mailbox):
     """Check everyone's ready, randomly assign givers and receivers, and send
