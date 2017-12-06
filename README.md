@@ -30,7 +30,7 @@ To ensure everything runs smoothly, remember the code:
 Navigate to your local repository using command line, then run this code:
 
 ~~~
-python secret_santa_mailer.py <<<EMAIL ADDRESS>> <<<CSV FILENAME>>> <<<KEEP GIFS VALUE>>>
+python secret_santa_mailer.py <<<EMAIL ADDRESS>>> <<<CSV FILENAME>>> <<<KEEP GIFS VALUE>>>
 ~~~
 
 where ``<<<EMAIL ADDRESS>>>`` is a valid mailbox from where emails are sent to each Secret Santa, and ``<<<CSV FILENAME>>>`` is the ``.csv`` file from Step 4, including the full path if it's not in your working directory. **Both parameters are required**.
