@@ -32,6 +32,7 @@ Attributes:
 """
 import getpass
 import json
+import imaplib
 import os
 import pandas as pd
 import re
@@ -311,6 +312,41 @@ def import_template(ext, path=".", enc=None):
 
     # Return the imported file
     return template_body
+
+
+def call_housekeeping(santas_mailbox, santas_letters):
+    """Call housekeeping to tidy away all of Santa's letters
+
+    Deletes the sent email messages to prevent anyone from finding out the
+    Secret Santa pairings.
+
+    Args:
+
+
+    Yields:
+
+    """
+    # Assign the IMAP server, and log into it
+    santas_server = imaplib.IMAP4_SSL("imap.gmail.com", 993)
+    santas_server.login(santas_mailbox, santas_key)
+
+    # Get a list of mailboxes, and select the Sent Mail
+    santas_server.list()
+    santas_server.select('"[Gmail]/Sent Mail"')
+
+    # Iterate through each Message-ID, and flag it for deletion
+    for santas_letter in santas_letters:
+        typ, data = santas_server.search(None, 'HEADER MESSAGE-ID',
+                                         santas_letter)
+        for num in data[0].split():
+            santas_server.store(num, '+FLAGS', '\\Deleted')
+
+    # Expunge all emails flagged for deletion
+    santas_server.expunge()
+
+    # Close the IMAP server, and logout
+    santas_server.close()
+    santas_server.logout()
 
 
 def call_postman(santas_mailbox, sleighs, santa_pairings):
