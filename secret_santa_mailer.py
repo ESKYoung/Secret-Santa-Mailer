@@ -321,9 +321,14 @@ def call_housekeeping(santas_mailbox, santas_letters):
     Secret Santa pairings.
 
     Args:
-
+        santas_mailbox (str): A valid email address corresponding to the Gmail
+            account.
+        santas_letters (list): A list of Message-IDs corresponding to the
+            specific emails sent out to all the Secret Santas
 
     Yields:
+        All emails sent from this script are deleted, as they are identified by
+        their Message-IDs
 
     """
     # Assign the IMAP server, and log into it
@@ -360,6 +365,9 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
     Requires Gmail account, and password. Account must be set to allow less
     secure apps, or, if using two-step verification, an app password must be
     used instead.
+
+    Once the email is sent, call another function to delete all sent emails, and
+    add some extra secerey to the entire process.
 
     Args:
         santas_mailbox (str): A valid email address corresponding to the Gmail
