@@ -460,6 +460,11 @@ def call_postman(santas_mailbox, sleighs, santa_pairings):
     # Exit server
     santas_server.quit()
 
+    print("Calling the housekeeper to clean Santa's desk...")
+
+    # Delete all sent emails to add an extra layer of secrecy to the process
+    call_housekeeping(santas_mailbox, santas_letters)
+
 
 def secret_santa_mailer(santas, reindeers, santas_mailbox):
     """Check everyone's ready, randomly assign givers and receivers, and send
@@ -491,7 +496,8 @@ def secret_santa_mailer(santas, reindeers, santas_mailbox):
 
     # Check that the user wants to send out the messages
     continue_checker("Secret Santa randomisation complete! Time to call the " +
-                     "postman!", "OK, maybe next " + "time then!")
+                     "postman, and the housekeeper!", "OK, maybe next time " +
+                     "then!")
 
     # Send emails out to the giver notifying them of their receiver
     call_postman(santas_mailbox, sleighs, secret_santa_pairings)
